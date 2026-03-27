@@ -5,6 +5,17 @@ const app = express();
 
 app.use(cors({ origin: "*" }));
 app.use(express.json());
+app.get("/create-admin", async (req, res) => {
+  const user = new User({
+    email: "admin@mnr.com",
+    password: "1234",
+    role: "admin"
+  });
+
+  await user.save();
+
+  res.send("Admin created");
+});
 
 /* ================= DATA ================= */
 
