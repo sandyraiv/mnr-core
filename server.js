@@ -38,17 +38,26 @@ app.get("/", (req, res) => {
 /* ================= CREATE ADMIN ================= */
 
 app.get("/create-admin", async (req, res) => {
-  const user = new User({
-    email: "admin@mnr.com",
-    password: "1234",
-    role: "admin",
-    company: "MNR"
-  });
+  try {
+    console.log("Creating admin...");
 
-  await user.save();
-  res.send("Admin created");
+    const user = new User({
+      email: "admin@mnr.com",
+      password: "1234",
+      role: "admin",
+      company: "MNR"
+    });
+
+    await user.save();
+
+    console.log("Admin saved:", user);
+
+    res.send("Admin created successfully");
+  } catch (err) {
+    console.log("Error saving user:", err);
+    res.send("Error: " + err.message);
+  }
 });
-
 /* ================= LOGIN ================= */
 
 app.post("/api/login", async (req, res) => {
