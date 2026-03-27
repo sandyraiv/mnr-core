@@ -113,4 +113,17 @@ app.listen(PORT, () => {
   console.log("🚀 Server running on port " + PORT);
 });
 
+const Quotation = mongoose.model("Quotation", {
+  client: String,
+  project: String,
+  items: Array,
+  total: Number
+});
+
+app.post("/api/quotation", async (req, res) => {
+  const q = new Quotation(req.body);
+  await q.save();
+  res.json(q);
+});
+
 console.log("Updated version");
