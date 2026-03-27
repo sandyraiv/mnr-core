@@ -72,12 +72,21 @@ app.post("/api/login", async (req, res) => {
 
 /* ================= ADD USER (ADMIN) ================= */
 
-app.post("/api/users", async (req, res) => {
-  const user = new User(req.body);
-  await user.save();
+app.post("/api/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.status(401).json({ msg: "User not found" });
+  }
+
+  if (user.password !== password) {
+    return res.status(401).json({ msg: "Wrong password" });
+  }
+
   res.json(user);
 });
-
 /* ================= GET LEADS ================= */
 
 app.get("/api/leads/:company", async (req, res) => {
