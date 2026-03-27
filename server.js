@@ -7,14 +7,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* ✅ ADD HERE */
+/* ✅ Mongo Connect */
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB Connected");
-  })
-  .catch((err) => {
-    console.log("Mongo Error:", err);
-  });
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log(err));
+
+/* ✅ ADD THIS MODEL HERE */
+const User = mongoose.model("User", {
+  email: String,
+  password: String,
+  role: String
+});
 
 app.get("/create-admin", async (req, res) => {
   const user = new User({
