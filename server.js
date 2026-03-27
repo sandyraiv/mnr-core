@@ -111,7 +111,7 @@ app.get("/api/pricing", (req, res) => {
 
 /* ================= START SERVER ================= */
 
-const PORT = process.env.PORT || 5000;
+
 
 app.get("/create-admin", async (req, res) => {
   const existing = await User.findOne({ email: "admin@mnr.com" });
@@ -130,7 +130,7 @@ app.get("/create-admin", async (req, res) => {
 
   res.send("Admin created");
 });
-
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
