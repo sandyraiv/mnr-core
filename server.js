@@ -1,4 +1,3 @@
-console.log("🔥 VERSION 2 RUNNING");
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -8,63 +7,46 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* ================= MONGO CONNECT ================= */
+/* ================= DB ================= */
 
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => console.log("❌ Mongo Error:", err));
+.then(() => console.log("MongoDB Connected"))
+.catch(err => console.log(err));
 
 /* ================= MODELS ================= */
 
 const User = mongoose.model("User", {
   email: String,
   password: String,
-  role: String
+  role: String,
+  company: String
 });
 
 const Lead = mongoose.model("Lead", {
   name: String,
   phone: String,
   status: String,
-  amount: Number
+  company: String
 });
 
-const Pricing = mongoose.model("Pricing", {
-  section: String,
-  item: String,
-  price: Number
-});
-
-/* ================= TEST ================= */
-
-app.get("/check", (req, res) => {
-  res.send("Check route working");
-});
+/* ================= ROOT ================= */
 
 app.get("/", (req, res) => {
-  res.send("MNR CORE Backend Running");
+  res.send("MNR SaaS Backend Running");
 });
 
 /* ================= CREATE ADMIN ================= */
 
 app.get("/create-admin", async (req, res) => {
-  try {
-    const existing = await User.findOne({ email: "admin@mnr.com" });
+  const user = new User({
+    email: "admin@mnr.com",
+    password: "1234",
+    role: "admin",
+    company: "MNR"
+  });
 
-    if (existing) return res.send("Admin already exists");
-
-    const user = new User({
-      email: "admin@mnr.com",
-      password: "1234",
-      role: "admin"
-    });
-
-    await user.save();
-
-    res.send("Admin created");
-  } catch (err) {
-    res.send("Error: " + err.message);
-  }
+  await user.save();
+  res.send("Admin created");
 });
 
 /* ================= LOGIN ================= */
@@ -79,12 +61,22 @@ app.post("/api/login", async (req, res) => {
   res.json(user);
 });
 
-/* ================= LEADS ================= */
+/* ================= ADD USER (ADMIN) ================= */
 
-app.get("/api/leads", async (req, res) => {
-  const data = await Lead.find();
-  res.json(data);
+app.post("/api/users", async (req, res) => {
+  const user = new User(req.body);
+  await user.save();
+  res.json(user);
 });
+
+/* ================= GET LEADS ================= */
+
+app.get("/api/leads/:company", async (req, res) => {
+  const leads = await Lead.find({ company: req.params.company });
+  res.json(leads);
+});
+
+/* ================= ADD LEAD ================= */
 
 app.post("/api/leads", async (req, res) => {
   const lead = new Lead(req.body);
@@ -92,17 +84,11 @@ app.post("/api/leads", async (req, res) => {
   res.json(lead);
 });
 
-/* ================= PRICING ================= */
+/* ================= UPDATE LEAD ================= */
 
-app.get("/api/pricing", async (req, res) => {
-  const data = await Pricing.find();
-  res.json(data);
-});
-
-app.post("/api/pricing", async (req, res) => {
-  const item = new Pricing(req.body);
-  await item.save();
-  res.json(item);
+app.put("/api/leads/:id", async (req, res) => {
+  await Lead.findByIdAndUpdate(req.params.id, req.body);
+  res.json({ msg: "Updated" });
 });
 
 /* ================= SERVER ================= */
@@ -110,20 +96,5 @@ app.post("/api/pricing", async (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log("🚀 Server running on port " + PORT);
+  console.log("Server running on port " + PORT);
 });
-
-const Quotation = mongoose.model("Quotation", {
-  client: String,
-  project: String,
-  items: Array,
-  total: Number
-});
-
-app.post("/api/quotation", async (req, res) => {
-  const q = new Quotation(req.body);
-  await q.save();
-  res.json(q);
-});
-
-console.log("Updated version");
