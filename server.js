@@ -36,6 +36,10 @@ const Pricing = mongoose.model("Pricing", {
 
 /* ================= TEST ================= */
 
+app.get("/check", (req, res) => {
+  res.send("Check route working");
+});
+
 app.get("/", (req, res) => {
   res.send("MNR CORE Backend Running");
 });
