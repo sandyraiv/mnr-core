@@ -1,3 +1,4 @@
+console.log("🔥 VERSION 2 RUNNING");
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
