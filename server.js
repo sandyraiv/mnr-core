@@ -1,22 +1,58 @@
-let pricing = [];
-
 const express = require("express");
 const cors = require("cors");
 
 const app = express();
 
-// Middleware
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 
-// Temporary in-memory data
+/* ================= DATA ================= */
+
+// USERS
+let users = [
+  { email: "admin@mnr.com", password: "1234", role: "admin" }
+];
+
+// LEADS
 let leads = [];
 
-// Routes
+// QUOTATIONS
+let quotations = [];
+
+// PRICING
+let pricing = [];
+
+/* ================= ROUTES ================= */
+
+// TEST
 app.get("/", (req, res) => {
   res.send("MNR CORE Backend Running");
 });
 
+/* ---------- LOGIN ---------- */
+app.post("/api/login", (req, res) => {
+  const { email, password } = req.body;
+
+  const user = users.find(
+    u => u.email === email && u.password === password
+  );
+
+  if (!user) return res.status(401).json({ message: "Invalid" });
+
+  res.json(user);
+});
+
+/* ---------- USERS ---------- */
+app.post("/api/users", (req, res) => {
+  users.push(req.body);
+  res.json({ message: "User Added" });
+});
+
+app.get("/api/users", (req, res) => {
+  res.json(users);
+});
+
+/* ---------- LEADS ---------- */
 app.get("/api/leads", (req, res) => {
   res.json(leads);
 });
@@ -38,14 +74,17 @@ app.put("/api/leads/:id", (req, res) => {
   res.json({ message: "Updated" });
 });
 
-// IMPORTANT: Dynamic port for Render
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+/* ---------- QUOTATION ---------- */
+app.post("/api/quotation", (req, res) => {
+  const quote = {
+    ...req.body,
+    _id: Date.now().toString()
+  };
+  quotations.push(quote);
+  res.json(quote);
 });
 
-// ADD PRICING
+/* ---------- PRICING ---------- */
 app.post("/api/pricing", (req, res) => {
   const item = {
     ...req.body,
@@ -55,7 +94,14 @@ app.post("/api/pricing", (req, res) => {
   res.json(item);
 });
 
-// GET PRICING
 app.get("/api/pricing", (req, res) => {
   res.json(pricing);
+});
+
+/* ================= START SERVER ================= */
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
 });
