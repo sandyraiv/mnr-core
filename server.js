@@ -7,144 +7,103 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* ✅ Mongo Connect */
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch(err => console.log(err));
+/* ================= MONGO CONNECT ================= */
 
-/* ✅ ADD THIS MODEL HERE */
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch(err => console.log("❌ Mongo Error:", err));
+
+/* ================= MODELS ================= */
+
 const User = mongoose.model("User", {
   email: String,
   password: String,
   role: String
 });
 
-app.get("/create-admin", async (req, res) => {
-  const user = new User({
-    email: "admin@mnr.com",
-    password: "1234",
-    role: "admin"
-  });
-
-  await user.save();
-
-  res.send("Admin created");
+const Lead = mongoose.model("Lead", {
+  name: String,
+  phone: String,
+  status: String,
+  amount: Number
 });
 
-/* ================= DATA ================= */
+const Pricing = mongoose.model("Pricing", {
+  section: String,
+  item: String,
+  price: Number
+});
 
-// USERS
-let users = [
-  { email: "admin@mnr.com", password: "1234", role: "admin" }
-];
+/* ================= TEST ================= */
 
-// LEADS
-let leads = [];
-
-// QUOTATIONS
-let quotations = [];
-
-// PRICING
-let pricing = [];
-
-/* ================= ROUTES ================= */
-
-// TEST
 app.get("/", (req, res) => {
   res.send("MNR CORE Backend Running");
 });
 
-/* ---------- LOGIN ---------- */
-app.post("/api/login", (req, res) => {
+/* ================= CREATE ADMIN ================= */
+
+app.get("/create-admin", async (req, res) => {
+  try {
+    const existing = await User.findOne({ email: "admin@mnr.com" });
+
+    if (existing) return res.send("Admin already exists");
+
+    const user = new User({
+      email: "admin@mnr.com",
+      password: "1234",
+      role: "admin"
+    });
+
+    await user.save();
+
+    res.send("Admin created");
+  } catch (err) {
+    res.send("Error: " + err.message);
+  }
+});
+
+/* ================= LOGIN ================= */
+
+app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
-  const user = users.find(
-    u => u.email === email && u.password === password
-  );
+  const user = await User.findOne({ email, password });
 
-  if (!user) return res.status(401).json({ message: "Invalid" });
+  if (!user) return res.status(401).json({ msg: "Invalid" });
 
   res.json(user);
 });
 
-/* ---------- USERS ---------- */
-app.post("/api/users", (req, res) => {
-  users.push(req.body);
-  res.json({ message: "User Added" });
+/* ================= LEADS ================= */
+
+app.get("/api/leads", async (req, res) => {
+  const data = await Lead.find();
+  res.json(data);
 });
 
-app.get("/api/users", (req, res) => {
-  res.json(users);
-});
-
-/* ---------- LEADS ---------- */
-app.get("/api/leads", (req, res) => {
-  res.json(leads);
-});
-
-app.post("/api/leads", (req, res) => {
-  const lead = {
-    ...req.body,
-    _id: Date.now().toString(),
-    status: "New"
-  };
-  leads.push(lead);
+app.post("/api/leads", async (req, res) => {
+  const lead = new Lead(req.body);
+  await lead.save();
   res.json(lead);
 });
 
-app.put("/api/leads/:id", (req, res) => {
-  leads = leads.map(l =>
-    l._id === req.params.id ? { ...l, ...req.body } : l
-  );
-  res.json({ message: "Updated" });
+/* ================= PRICING ================= */
+
+app.get("/api/pricing", async (req, res) => {
+  const data = await Pricing.find();
+  res.json(data);
 });
 
-/* ---------- QUOTATION ---------- */
-app.post("/api/quotation", (req, res) => {
-  const quote = {
-    ...req.body,
-    _id: Date.now().toString()
-  };
-  quotations.push(quote);
-  res.json(quote);
-});
-
-/* ---------- PRICING ---------- */
-app.post("/api/pricing", (req, res) => {
-  const item = {
-    ...req.body,
-    _id: Date.now().toString()
-  };
-  pricing.push(item);
+app.post("/api/pricing", async (req, res) => {
+  const item = new Pricing(req.body);
+  await item.save();
   res.json(item);
 });
 
-app.get("/api/pricing", (req, res) => {
-  res.json(pricing);
-});
+/* ================= SERVER ================= */
 
-/* ================= START SERVER ================= */
-
-
-
-app.get("/create-admin", async (req, res) => {
-  const existing = await User.findOne({ email: "admin@mnr.com" });
-
-  if (existing) {
-    return res.send("Admin already exists");
-  }
-
-  const user = new User({
-    email: "admin@mnr.com",
-    password: "1234",
-    role: "admin"
-  });
-
-  await user.save();
-
-  res.send("Admin created");
-});
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+  console.log("🚀 Server running on port " + PORT);
 });
