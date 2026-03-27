@@ -113,6 +113,24 @@ app.get("/api/pricing", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
+app.get("/create-admin", async (req, res) => {
+  const existing = await User.findOne({ email: "admin@mnr.com" });
+
+  if (existing) {
+    return res.send("Admin already exists");
+  }
+
+  const user = new User({
+    email: "admin@mnr.com",
+    password: "1234",
+    role: "admin"
+  });
+
+  await user.save();
+
+  res.send("Admin created");
+});
+
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
