@@ -1,3 +1,5 @@
+let pricing = [];
+
 const express = require("express");
 const cors = require("cors");
 
@@ -41,4 +43,19 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
+});
+
+// ADD PRICING
+app.post("/api/pricing", (req, res) => {
+  const item = {
+    ...req.body,
+    _id: Date.now().toString()
+  };
+  pricing.push(item);
+  res.json(item);
+});
+
+// GET PRICING
+app.get("/api/pricing", (req, res) => {
+  res.json(pricing);
 });
