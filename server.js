@@ -36,6 +36,7 @@ const Lead = mongoose.model("Lead", {
   name: String,
   phone: String,
   status: String,
+  price: Number,   // 💰 NEW FIELD
   companyId: String
 });
 
