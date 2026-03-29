@@ -139,6 +139,13 @@ app.put("/api/leads/:id", async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
+/* ================= CLEAR LEADS ================= */
+
+app.delete("/api/clear-leads", async (req, res) => {
+  await Lead.deleteMany({});
+  res.send("All leads deleted");
+});
+
 /* ================= SEED DUMMY LEADS ================= */
 
 app.get("/seed-leads", async (req, res) => {
