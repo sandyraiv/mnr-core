@@ -113,26 +113,33 @@ app.delete("/api/clear-leads", async (req, res) => {
 /* ================= ADD DUMMY LEADS ================= */
 
 app.get("/seed-leads", async (req, res) => {
-  const company = await Company.findOne({ name: "MNR Interiors" });
+  try {
+    const company = await Company.findOne();
 
-  if (!company) return res.send("Company not found");
+    if (!company) {
+      return res.send("❌ No company found");
+    }
 
-  const leads = [
-    { name: "Ravi Kumar", phone: "9876543210", status: "New", price: 150000 },
-    { name: "Anjali Sharma", phone: "9123456780", status: "Contacted", price: 200000 },
-    { name: "Suresh Reddy", phone: "9988776655", status: "Visit", price: 350000 },
-    { name: "Karthik N", phone: "9012345678", status: "Quote", price: 500000 },
-    { name: "Priya Singh", phone: "9871234560", status: "Closed", price: 650000 }
-  ];
+    const leads = [
+      { name: "Ravi Kumar", phone: "9876543210", status: "New", price: 150000 },
+      { name: "Anjali Sharma", phone: "9123456780", status: "Contacted", price: 200000 },
+      { name: "Suresh Reddy", phone: "9988776655", status: "Visit", price: 350000 },
+      { name: "Karthik N", phone: "9012345678", status: "Quote", price: 500000 },
+      { name: "Priya Singh", phone: "9871234560", status: "Closed", price: 650000 }
+    ];
 
-  const finalLeads = leads.map(l => ({
-    ...l,
-    companyId: company._id
-  }));
+    const finalLeads = leads.map(l => ({
+      ...l,
+      companyId: company._id
+    }));
 
-  await Lead.insertMany(finalLeads);
+    await Lead.insertMany(finalLeads);
 
-  res.send("Dummy leads added");
+    res.send("✅ Dummy leads added");
+  } catch (err) {
+    console.log(err);
+    res.send("❌ Error adding leads");
+  }
 });
 
 /* ================= SERVER ================= */
