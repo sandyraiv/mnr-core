@@ -28,11 +28,11 @@ const User = mongoose.model("User", {
 });
 
 const Lead = mongoose.model("Lead", {
-  name: String,
-  phone: String,
-  status: String,
-  price: Number,
-  companyId: String
+  name: { type: String, required: true },
+  phone: { type: String },
+  status: { type: String },
+  price: { type: Number, default: 0 },
+  companyId: { type: String }
 });
 
 /* ================= ROOT ================= */
