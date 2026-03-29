@@ -158,16 +158,16 @@ app.get("/seed-leads", async (req, res) => {
     }
 
     const dummyLeads = [
-      { name: "Ravi Kumar", phone: "9876543210", status: "New" },
-      { name: "Anjali Sharma", phone: "9123456780", status: "Contacted" },
-      { name: "Suresh Reddy", phone: "9988776655", status: "Visit" },
-      { name: "Karthik N", phone: "9012345678", status: "Quote" },
-      { name: "Priya Singh", phone: "9871234560", status: "Closed" },
-      { name: "Arjun Mehta", phone: "9001122334", status: "New" },
-      { name: "Deepika Rao", phone: "9112233445", status: "Contacted" },
-      { name: "Manoj Kumar", phone: "9223344556", status: "Visit" },
-      { name: "Sneha Iyer", phone: "9334455667", status: "Quote" },
-      { name: "Vikram Patel", phone: "9445566778", status: "Closed" }
+      { name: "Ravi Kumar", phone: "9876543210", status: "New", price: 150000 },
+      { name: "Anjali Sharma", phone: "9123456780", status: "Contacted", price: 200000 },
+      { name: "Suresh Reddy", phone: "9988776655", status: "Visit", price: 350000 },
+      { name: "Karthik N", phone: "9012345678", status: "Quote", price: 500000 },
+      { name: "Priya Singh", phone: "9871234560", status: "Closed", price: 650000 },
+      { name: "Arjun Mehta", phone: "9001122334", status: "New", price: 180000 },
+      { name: "Deepika Rao", phone: "9112233445", status: "Contacted", price: 220000 },
+      { name: "Manoj Kumar", phone: "9223344556", status: "Visit", price: 300000 },
+      { name: "Sneha Iyer", phone: "9334455667", status: "Quote", price: 450000 },
+      { name: "Vikram Patel", phone: "9445566778", status: "Closed", price: 700000 }
     ];
 
     const leadsWithCompany = dummyLeads.map(l => ({
@@ -177,7 +177,7 @@ app.get("/seed-leads", async (req, res) => {
 
     await Lead.insertMany(leadsWithCompany);
 
-    res.send("Dummy leads added successfully");
+    res.send("Dummy leads with price added 💰");
   } catch (err) {
     console.log(err);
     res.send("Error adding dummy leads");
