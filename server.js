@@ -9,8 +9,8 @@ app.use(express.json());
 /* ================= DATABASE ================= */
 
 mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.log("Mongo Error:", err));
+.then(() => console.log("✅ MongoDB Connected"))
+.catch(err => console.log("❌ Mongo Error:", err));
 
 /* ================= MODELS ================= */
 
@@ -29,45 +29,68 @@ const User = mongoose.model("User", {
 
 const Lead = mongoose.model("Lead", {
   name: { type: String, required: true },
-  phone: { type: String },
-  status: { type: String },
+  phone: String,
+  status: String,
   price: { type: Number, default: 0 },
-  companyId: { type: String }
+  companyId: String
 });
 
 /* ================= ROOT ================= */
 
 app.get("/", (req, res) => {
-  res.send("Backend Running");
+  res.send("🚀 MNR Backend Running");
 });
 
 /* ================= CREATE COMPANY ================= */
 
 app.get("/create-company", async (req, res) => {
-  const company = new Company({
-    name: "MNR Interiors",
-    plan: "premium",
-    status: "active"
-  });
+  try {
+    const existing = await Company.findOne({ name: "MNR Interiors" });
 
-  await company.save();
-  res.json(company);
+    if (existing) {
+      return res.send("Company already exists");
+    }
+
+    const company = new Company({
+      name: "MNR Interiors",
+      plan: "premium",
+      status: "active"
+    });
+
+    await company.save();
+    res.json(company);
+
+  } catch (err) {
+    res.send("Error creating company");
+  }
 });
 
 /* ================= CREATE ADMIN ================= */
 
 app.get("/create-admin", async (req, res) => {
-  const company = await Company.findOne({ name: "MNR Interiors" });
+  try {
+    const company = await Company.findOne();
 
-  const user = new User({
-    email: "admin@mnr.com",
-    password: "1234",
-    role: "admin",
-    companyId: company._id
-  });
+    if (!company) return res.send("Create company first");
 
-  await user.save();
-  res.send("Admin created");
+    const existing = await User.findOne({ email: "admin@mnr.com" });
+
+    if (existing) return res.send("Admin already exists");
+
+    const user = new User({
+      email: "admin@mnr.com",
+      password: "1234",
+      role: "admin",
+      companyId: company._id
+    });
+
+    await user.save();
+
+    res.send("✅ Admin created");
+
+  } catch (err) {
+    res.send("Error creating admin");
+  }
 });
 
 /* ================= LOGIN ================= */
@@ -91,26 +114,38 @@ app.post("/api/login", async (req, res) => {
 /* ================= ADD LEAD ================= */
 
 app.post("/api/leads", async (req, res) => {
-  const lead = new Lead(req.body);
-  await lead.save();
-  res.json(lead);
+  try {
+    const lead = new Lead(req.body);
+    await lead.save();
+    res.json(lead);
+  } catch (err) {
+    res.status(500).send("Error saving lead");
+  }
 });
 
 /* ================= GET LEADS ================= */
 
 app.get("/api/leads/:companyId", async (req, res) => {
-  const leads = await Lead.find({ companyId: req.params.companyId });
-  res.json(leads);
+  try {
+    const leads = await Lead.find({ companyId: req.params.companyId });
+    res.json(leads);
+  } catch (err) {
+    res.status(500).send("Error fetching leads");
+  }
 });
 
-/* ================= CLEAR LEADS ================= */
+/* ================= CLEAR LEADS (FIXED) ================= */
 
-app.delete("/api/clear-leads", async (req, res) => {
-  await Lead.deleteMany({});
-  res.send("All leads deleted");
+app.get("/api/clear-leads", async (req, res) => {
+  try {
+    await Lead.deleteMany({});
+    res.send("🧹 All leads deleted");
+  } catch (err) {
+    res.send("Error deleting leads");
+  }
 });
 
-/* ================= ADD DUMMY LEADS ================= */
+/* ================= SEED LEADS (FIXED) ================= */
 
 app.get("/seed-leads", async (req, res) => {
   try {
@@ -136,6 +171,7 @@ app.get("/seed-leads", async (req, res) => {
     await Lead.insertMany(finalLeads);
 
     res.send("✅ Dummy leads added");
+
   } catch (err) {
     console.log(err);
     res.send("❌ Error adding leads");
@@ -147,5 +183,5 @@ app.get("/seed-leads", async (req, res) => {
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+  console.log("🚀 Server running on port " + PORT);
 });
