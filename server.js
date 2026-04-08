@@ -10,47 +10,58 @@ mongoose.connect(process.env.MONGO_URI)
 .then(()=>console.log("Mongo Connected"))
 .catch(err=>console.log(err));
 
-/* ===== MODEL ===== */
+/* MODELS */
+const User = mongoose.model("User", {
+  email:String,
+  password:String,
+  role:String
+});
+
 const Lead = mongoose.model("Lead", {
   name:String,
   phone:String,
   status:String,
-  price:Number
+  price:Number,
+  employee:String
 });
 
-/* ===== ROOT ===== */
-app.get("/", (req,res)=>{
-  res.send("Backend Running");
+/* LOGIN */
+app.post("/api/login", async (req,res)=>{
+  const {email,password} = req.body;
+
+  let user = await User.findOne({email,password});
+  if(!user){
+    user = await User.create({email,password,role:"admin"});
+  }
+
+  res.json(user);
 });
 
-/* ===== GET LEADS (NO FILTER) ===== */
+/* LEADS */
 app.get("/api/leads", async (req,res)=>{
   const data = await Lead.find();
   res.json(data);
 });
 
-/* ===== ASSIGN ===== */
-app.put("/api/assign-lead/:id", async (req,res)=>{
-  res.send("Assigned (demo)");
+/* ASSIGN */
+app.put("/api/assign/:id", async (req,res)=>{
+  await Lead.findByIdAndUpdate(req.params.id,{
+    employee:req.body.employee
+  });
+  res.send("Assigned");
 });
 
-/* ===== CLEAR ===== */
-app.get("/api/clear-leads", async (req,res)=>{
+/* SEED */
+app.get("/seed", async (req,res)=>{
   await Lead.deleteMany({});
-  res.send("Cleared");
+
+  await Lead.insertMany([
+    {name:"Luxury Villa",phone:"9999",status:"New",price:250000},
+    {name:"2BHK Interior",phone:"8888",status:"Quote",price:180000},
+    {name:"Office Setup",phone:"7777",status:"Closed",price:500000}
+  ]);
+
+  res.send("Demo Ready");
 });
 
-/* ===== SEED ===== */
-app.get("/seed-leads", async (req,res)=>{
-  const leads = [
-    {name:"Ravi",phone:"9999",status:"New",price:150000},
-    {name:"Anjali",phone:"8888",status:"Quote",price:300000},
-    {name:"Kiran",phone:"7777",status:"Closed",price:500000}
-  ];
-
-  await Lead.insertMany(leads);
-  res.send("Demo Data Added");
-});
-
-/* ===== SERVER ===== */
 app.listen(10000, ()=>console.log("Server running"));
